@@ -16,12 +16,17 @@ public class ParkingSpot {
         this.isAvailable = true;
     }
 
-    public boolean reserverSpot() {
+    public synchronized boolean reserverSpot() {
         if (this.isAvailable) {
             this.isAvailable = false;
             return true;
         } else {
             return false;
         }
+    }
+
+    public synchronized boolean freeSpot() {
+        this.isAvailable = true;
+        return true;
     }
 }

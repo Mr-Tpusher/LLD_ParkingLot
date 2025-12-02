@@ -1,9 +1,10 @@
 package v0;
 
 import v0.constants.VehicleSize;
+import v0.exceptions.SpotUnavailableException;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SpotUnavailableException {
 
         ParkingLot parkingLot = new ParkingLot("ParkHere");
 

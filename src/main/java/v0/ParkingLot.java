@@ -3,11 +3,11 @@ package v0;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import v0.exceptions.SpotUnavailableException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -33,20 +33,31 @@ public class ParkingLot {
         }
     }
 
-    public Ticket park(VehicleDetails vehicleDetails) {
+    public synchronized Ticket park(VehicleDetails vehicleDetails) throws SpotUnavailableException {
+        // Iterate over all the available spots and find the first nearest
+        for (Map.Entry<Integer, ParkingSpot> entry : availableSpots.entrySet()) {
+            ParkingSpot parkingSpot = entry.getValue();
 
-        // return nearest to the entry
-        Map.Entry<Integer, ParkingSpot> entry = availableSpots.firstEntry();
-        ParkingSpot parkingSpot = entry.getValue();
-        parkingSpot.reserverSpot();
-        availableSpots.remove(entry.getKey());
-
-        return new Ticket(vehicleDetails, parkingSpot);
+            // try to reserver the spot using its own lock
+            if (parkingSpot.reserverSpot()) {
+                // if successfully reserved, remove it from available spots
+                synchronized (this) {
+                    availableSpots.remove(entry.getKey());
+                }
+                return new Ticket(vehicleDetails, parkingSpot);
+            }
+        }
+            throw new SpotUnavailableException("No spots are available at the moment");
     }
 
-    public double exit(Ticket ticket) {
+    public synchronized double exit(Ticket ticket) {
         ParkingSpot parkingSpot = ticket.getParkingSpot();
-        availableSpots.put(spotDistance.get(parkingSpot), parkingSpot );
+        parkingSpot.freeSpot();
+
+        synchronized (this) {
+            availableSpots.put(spotDistance.get(parkingSpot), parkingSpot);
+        }
+
         return 100;
     }
 }
