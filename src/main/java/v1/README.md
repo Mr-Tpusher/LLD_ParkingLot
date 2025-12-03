@@ -12,7 +12,7 @@
   
 
 ### APIs
-``` Ticket park(VehicleDetails vehicleDetails) ```
+``` Ticket park(VehicleDetails vehicle) ```
 ``` Double exit(Long ticketId) ```
 
 
